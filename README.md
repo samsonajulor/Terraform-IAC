@@ -191,6 +191,8 @@ First, destroy the current infrastructure. Since we are still in development, th
 
 To destroy whatever has been created run `terraform destroy` command, and type `yes` after evaluating the plan.
 
+![terraform destroy](./images/destroy.png)
+
 ## FIXING THE PROBLEMS BY CODE REFACTORING
 - Fixing Hard Coded Values: We will introduce variables, and remove hard coding.
 
@@ -332,7 +334,7 @@ Since data.aws_availability_zones.available.names returns a list like ["us-east-
 
 Open up terraform console and try it
 
-
+![length and count](./images/lenght%20and%20count.png)
 
 Now we can simply update the public subnet block like this
 
@@ -443,6 +445,7 @@ resource "aws_subnet" "public" {
 
 **Note:** You should try changing the value of preferred_number_of_public_subnets variable to null and notice how many subnets get created.
 
+![removed hard code values](./images/terraform%20apply%20after%20removing%20hardcoded%20values.png)
 
 ## Introducing variables.tf & terraform.tfvars
 Instead of having a long list of variables in main.tf file, we can actually make our code a lot more readable and better structured by moving out some parts of the configuration content to other files.
@@ -546,3 +549,5 @@ You should also have this file structure in the PBL folder.
 ```
 
 Run `terraform plan` and ensure everything works
+
+![final folder structure](./images/final%20folder%20structure.png)
