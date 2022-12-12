@@ -86,7 +86,7 @@ Set up Terraform CLI as per this [instruction](https://developer.hashicorp.com/t
 
 ```
 provider "aws" {
-  region = "eu-central-1"
+  region = "us-east-1"
 }
 
 # Create VPC
@@ -104,7 +104,7 @@ resource "aws_vpc" "main" {
 - The next thing we need to do, is to download necessary plugins for Terraform to work. These plugins are used by providers and provisioners. At this stage, we only have provider in our main.tf file. So, Terraform will just download plugin for AWS provider.
 - Lets accomplish this with `terraform init` command as seen in the below demonstration.
 
-![terraform init](./images/Terraform-init.gif)
+![terraform init](./images/terraform%20init.png)
 
 **Observations:**
 
@@ -113,6 +113,8 @@ resource "aws_vpc" "main" {
 Moving on, let us create the only resource we just defined. aws_vpc. But before we do that, we should check to see what terraform intends to create before we tell it to go ahead and create it.
 
 - Run `terraform plan`
+![terraform plan](./images/terraform%20plan.png)\
+
 - Then, if you are happy with changes planned, execute `terraform apply`
 
 ![terraform apply](./images/Terraform%20apply.gif)
@@ -152,7 +154,7 @@ Add below configuration to the main.tf file:
     vpc_id                     = aws_vpc.main.id
     cidr_block                 = "172.16.0.0/24"
     map_public_ip_on_launch    = true
-    availability_zone          = "eu-central-1a"
+    availability_zone          = "us-east-1a"
 
 }
 
@@ -161,7 +163,7 @@ Add below configuration to the main.tf file:
     vpc_id                     = aws_vpc.main.id
     cidr_block                 = "172.16.1.0/24"
     map_public_ip_on_launch    = true
-    availability_zone          = "eu-central-1b"
+    availability_zone          = "us-east-1b"
 }
 ```
 
@@ -170,8 +172,16 @@ Add below configuration to the main.tf file:
 
 Run `terraform plan` and `terraform apply`
 
-**Observations:**
+- terraform apply ![terraform apply](./images/terraform%20apply.png)
 
+- other scripts: `terraform fmt` `terraform validate`
+![format and validate](./images/format%20and%20validate.png)
+
+- vpc and subnets created programmatically:
+![vpc created](./images/vpc%20created.png)
+![subnets created](./images/public%20subnets%20created.png)
+
+**Observations:**
 - Hard coded values: Remember our best practice hint from the beginning? Both the availability_zone and cidr_block arguments are hard coded. We should always endeavour to make our work dynamic.
 - Multiple Resource Blocks: Notice that we have declared multiple resource blocks for each subnet in the code. This is bad coding practice. We need to create a single resource block that can dynamically create resources without specifying multiple blocks. Imagine if we wanted to create 10 subnets, our code would look very clumsy. So, we need to optimize this by introducing a count argument.
 
@@ -188,7 +198,7 @@ To destroy whatever has been created run `terraform destroy` command, and type `
 
 ```
     variable "region" {
-        default = "eu-central-1"
+        default = "us-east-1"
     }
 
     provider "aws" {
@@ -200,7 +210,7 @@ Do the same to `cidr` value in the `vpc` block, and all the other arguments.
 
 ```
     variable "region" {
-        default = "eu-central-1"
+        default = "us-east-1"
     }
 
     variable "vpc_cidr" {
@@ -271,12 +281,12 @@ The count tells us that we need 2 subnets. Therefore, Terraform will invoke a lo
 The data resource will return a list object that contains a list of AZs. Internally, Terraform will receive the data like this
 
 ```
-  ["eu-central-1a", "eu-central-1b"]
+  ["us-east-1a", "us-east-1b"]
 ```
 
 Each of them is an index, the first one is index 0, while the other is index 1. If the data returned had more than 2 records, then the index numbers would continue to increment.
 
-Therefore, each time Terraform goes into a loop to create a subnet, it must be created in the retrieved AZ from the list. Each loop will need the index number to determine what AZ the subnet will be created. That is why we have `data.aws_availability_zones.available.names[count.index]` as the value for availability_zone. When the first loop runs, the first index will be 0, therefore the AZ will be eu-central-1a. The pattern will repeat for the second loop.
+Therefore, each time Terraform goes into a loop to create a subnet, it must be created in the retrieved AZ from the list. Each loop will need the index number to determine what AZ the subnet will be created. That is why we have `data.aws_availability_zones.available.names[count.index]` as the value for availability_zone. When the first loop runs, the first index will be 0, therefore the AZ will be us-east-1a. The pattern will repeat for the second loop.
 
 But we still have a problem. If we run Terraform with this configuration, it may succeed for the first time, but by the time it goes into the second loop, it will fail because we still have `cidr_block` hard coded. The same `cidr_block` cannot be created twice within the same VPC. So, we have a little more work to do.
 
@@ -316,9 +326,9 @@ If we cannot hard code a value we want, then we will need a way to dynamically p
 
 To do this, we can introduce length() function, which basically determines the length of a given list, map, or string.
 
-Since data.aws_availability_zones.available.names returns a list like ["eu-central-1a", "eu-central-1b", "eu-central-1c"] we can pass it into a length function and get number of the AZs.
+Since data.aws_availability_zones.available.names returns a list like ["us-east-1a", "us-east-1b", "us-east-1c"] we can pass it into a length function and get number of the AZs.
 
-`length(["eu-central-1a", "eu-central-1b", "eu-central-1c"])`
+`length(["us-east-1a", "us-east-1b", "us-east-1c"])`
 
 Open up terraform console and try it
 
@@ -379,7 +389,7 @@ state = "available"
 }
 
 variable "region" {
-      default = "eu-central-1"
+      default = "us-east-1"
 }
 
 variable "vpc_cidr" {
@@ -480,7 +490,7 @@ resource "aws_subnet" "public" {
 **variables.tf**
 ```
 variable "region" {
-      default = "eu-central-1"
+      default = "us-east-1"
 }
 
 variable "vpc_cidr" {
@@ -510,7 +520,7 @@ variable "enable_classiclink_dns_support" {
 
 **terraform.tfvars**
 ```
-region = "eu-central-1"
+region = "us-east-1"
 
 vpc_cidr = "172.16.0.0/16" 
 
