@@ -28,7 +28,9 @@ for bucket in s3.buckets.all():
     print(bucket.name)
 ```
 
-You shall see your previously created S3 bucket name – <yourname>-dev-terraform-bucket.
+or run `aws s3 ls`
+
+![bucket created](./images/list%20of%20bucket%20created.png)
 
 ## The secrets of writing quality Terraform code
 The secret recipe of a successful Terraform projects consists of:
